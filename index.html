@@ -56,6 +56,45 @@
         .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
         .login-hint { position:relative; z-index:6; margin-top:16px; font-family:var(--mono); font-size:10px; letter-spacing:2px; color:var(--accent); text-align:center; }
 
+
+        /* ===== PRE-EXAM COUNTDOWN ===== */
+        .countdown-card { width:min(720px,94vw); text-align:center; padding:38px 28px; }
+        .countdown-course { display:inline-block; margin:0 auto 18px; padding:6px 14px; border-radius:20px; color:var(--accent); background:rgba(22,101,52,0.08); border:1px solid rgba(22,101,52,0.25); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; }
+        .countdown-title { font-family:var(--mono); font-size:13px; letter-spacing:3px; color:var(--textDim); text-transform:uppercase; margin-bottom:18px; }
+        .countdown-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:20px 0 18px; }
+        .countdown-unit { background:#f0fdf4; border:1px solid rgba(22,101,52,0.18); border-radius:12px; padding:18px 10px; }
+        .countdown-number { font-family:var(--mono); font-size:34px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; }
+        .countdown-unit-label { font-size:9px; letter-spacing:2px; color:var(--textDim); text-transform:uppercase; margin-top:5px; }
+        .countdown-date { color:var(--textDim); font-size:13px; margin-top:10px; }
+        .countdown-status { color:var(--accent); font-size:12px; min-height:18px; margin-top:10px; }
+        .testing-hotspot { position:fixed; right:4px; bottom:4px; width:14px; height:14px; opacity:0.01; background:transparent; border:0; cursor:default; z-index:200; }
+        .testing-modal { position:fixed; inset:0; z-index:10080; background:rgba(0,0,0,0.48); display:none; align-items:center; justify-content:center; padding:20px; }
+        .testing-modal.show { display:flex; }
+        .testing-box { width:min(360px,92vw); background:white; border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:26px; text-align:center; }
+        .testing-box h3 { color:var(--accent); font-family:var(--mono); letter-spacing:2px; font-size:16px; margin-bottom:8px; }
+        .testing-box p { color:var(--textDim); font-size:12px; margin-bottom:16px; }
+        .testing-box input { width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; outline:none; margin-bottom:10px; font-family:var(--mono); }
+        .testing-box input:focus { border-color:var(--accent); }
+        .testing-error { min-height:18px; color:var(--danger); font-size:11px; margin-bottom:8px; }
+        .testing-actions { display:flex; gap:8px; }
+        .testing-actions button { flex:1; }
+        .confirm-details { width:min(640px,100%); }
+        .confirm-row { display:grid; grid-template-columns:150px 1fr; gap:12px; padding:11px 0; border-bottom:1px solid #edf0f2; text-align:left; }
+        .confirm-row:last-child { border-bottom:0; }
+        .confirm-label { color:var(--textDim); font-size:11px; text-transform:uppercase; letter-spacing:1.2px; }
+        .confirm-value { color:var(--text); font-size:14px; font-weight:600; word-break:break-word; }
+        .question-type-badge { display:inline-block; margin-bottom:12px; padding:4px 10px; border-radius:15px; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); background:rgba(22,101,52,0.07); border:1px solid rgba(22,101,52,0.2); }
+        .fill-answer-wrap { width:100%; margin:0 auto; }
+        .fill-answer-input { width:100%; padding:14px 15px; border:1px solid var(--border); border-radius:8px; background:#f9fafb; color:var(--text); font-size:15px; outline:none; }
+        .fill-answer-input:focus { border-color:var(--accent); box-shadow:0 0 14px rgba(22,101,52,0.12); }
+        .per-question-note { font-size:10px; color:var(--textDim); margin-top:8px; }
+        @media (max-width:600px) {
+            .countdown-grid { gap:7px; }
+            .countdown-unit { padding:13px 5px; }
+            .countdown-number { font-size:25px; }
+            .confirm-row { grid-template-columns:1fr; gap:3px; }
+        }
+
         /* ===== PORTAL SHELL ===== */
         #portalShell { position:fixed; inset:0; background:var(--bg); z-index:100; display:none; flex-direction:column; }
         #portalShell.active { display:flex; }
@@ -263,10 +302,11 @@
     <div id="loginScreen" class="screen active">
         <div class="login-box">
             <div class="login-title">FINAL EXAM</div>
-            <div class="login-sub">SECURE ACCESS <span class="blink">_</span></div>
-            <div class="key-input-wrap"><input type="password" id="keyInput" placeholder="Enter your Key" autocomplete="off"></div>
+            <div class="login-sub">SECURE STUDENT ACCESS <span class="blink">_</span></div>
+            <div class="field"><label for="loginNameInput">Full Name</label><input type="text" id="loginNameInput" placeholder="Enter your full name" autocomplete="off"></div>
+            <div class="field"><label for="loginEmailInput">Email Address</label><input type="email" id="loginEmailInput" placeholder="Enter your registered email" autocomplete="off"></div>
             <div id="loginError"></div>
-            <button class="btn-primary" id="loginSubmitBtn">Submit</button>
+            <button class="btn-primary" id="loginSubmitBtn">Login</button>
         </div>
         <div class="login-hint">ONLY FOR REGISTERED APPLICANTS</div>
     </div>
@@ -280,17 +320,34 @@
         </div>
         <div class="portal-body" id="portalBody">
 
-            <!-- REGISTRATION -->
-            <div class="card" id="regScreen">
-                <h2>Candidate Registration</h2>
-                <div class="sub">Fill in your details to begin the examination.</div>
-                <div id="regBlockMsg" class="block-msg hidden"></div>
-                <div class="field"><label for="fullNameInput">Full Name</label><input type="text" id="fullNameInput" placeholder="e.g. JOHN DOE"><div class="err" id="fullNameErr"></div></div>
-                <div class="field"><label for="courseSelect">Select Course</label><select id="courseSelect"><option value="">— Choose a course —</option><option value="hardware">Introduction to Computer Hardware &amp; Software</option><option value="wordpress">WordPress Fundamentals</option></select><div class="err" id="courseErr"></div></div>
-                <div class="field"><label for="emailInput">Gmail Address</label><input type="email" id="emailInput" placeholder="yourname@gmail.com"><div class="err" id="emailErr"></div></div>
-                <div class="btn-row"><button class="btn-primary" id="regNextBtn">Next</button></div>
+            <!-- PRE-EXAM COUNTDOWN -->
+            <div class="card countdown-card hidden" id="countdownScreen">
+                <div class="countdown-course" id="countdownCourse">Course</div>
+                <div class="countdown-title">Examination Opens After Countdown</div>
+                <h2>Final Examination</h2>
+                <div class="sub" id="countdownStudent">Registered candidate</div>
+                <div class="countdown-grid">
+                    <div class="countdown-unit"><div class="countdown-number" id="cdDays">00</div><div class="countdown-unit-label">Days</div></div>
+                    <div class="countdown-unit"><div class="countdown-number" id="cdHours">00</div><div class="countdown-unit-label">Hours</div></div>
+                    <div class="countdown-unit"><div class="countdown-number" id="cdMinutes">00</div><div class="countdown-unit-label">Minutes</div></div>
+                    <div class="countdown-unit"><div class="countdown-number" id="cdSeconds">00</div><div class="countdown-unit-label">Seconds</div></div>
+                </div>
+                <div class="countdown-date">Exam access opens: <b>28 August 2026 — 11:00 AM (Pakistan Time)</b></div>
+                <div class="countdown-status" id="countdownStatus">Please wait. The examination has not opened yet.</div>
             </div>
+            <button id="testingHotspot" class="testing-hotspot" aria-label="Testing"></button>
 
+            <!-- REGISTRATION / DETAILS CONFIRMATION -->
+            <div class="card confirm-details hidden" id="regScreen">
+                <h2>Confirm Your Details</h2>
+                <div class="sub">Please verify the information below before continuing.</div>
+                <div class="confirm-row"><div class="confirm-label">Full Name</div><div class="confirm-value" id="confirmName"></div></div>
+                <div class="confirm-row"><div class="confirm-label">Email Address</div><div class="confirm-value" id="confirmEmail"></div></div>
+                <div class="confirm-row"><div class="confirm-label">Current Course</div><div class="confirm-value" id="confirmCourse"></div></div>
+                <div class="data-notice" style="margin-top:18px;"><div class="dot"></div><div><b>Important:</b> Once you begin the examination, your attempt is permanently consumed. No retake will be available.</div></div>
+                <div class="btn-row"><button class="btn-primary" id="regNextBtn">Confirm &amp; Continue</button></div>
+                <div id="regBlockMsg" class="block-msg hidden" style="margin-top:14px;"></div>
+            </div>
             <!-- TERMS -->
             <div class="card terms-card hidden" id="termsScreen">
                 <h2>Examination Rules &amp; Terms</h2>
@@ -304,9 +361,9 @@
                     <h3>Zero-Tolerance Voice Policy</h3><p>Your microphone is monitored continuously. The system is calibrated to your room's background noise before the exam starts, so it can detect even a soft voice. If any speech or voice is detected at any point, the exam ends immediately — there are no extra chances for this rule. Whatever you have answered so far will be submitted automatically.</p>
                     <h3>Browser &amp; Window Restrictions</h3><p>Switching tabs, minimizing the browser, losing window focus, exiting full-screen, right-clicking, copying/pasting, or attempting to open developer tools will each be recorded as a violation.</p>
                     <h3>Violation Policy</h3><p>A maximum of 5 general violations (tab switching, focus loss, full-screen exit, blocked shortcuts, etc.) are permitted. Exceeding this limit will auto-terminate the exam. Face and voice violations follow their own separate, stricter rules described above.</p>
-                    <h3>Time Limit</h3><p>You have 20 minutes to complete all 30 questions. The exam will auto-submit when time expires.</p>
+                    <h3>Time Limit</h3><p>Each question has a maximum of 60 seconds. When the timer for a question expires, the system automatically moves to the next question. The exam auto-submits after the final question.</p>
                     <h3>Academic Integrity</h3><p>You must complete the exam independently. No external assistance or materials are allowed.</p>
-                    <h3>One Retake Rule</h3><p>If you fail, you may take one retake. After that, no further attempts are allowed for this course.</p>
+                    <h3>No Retake Policy</h3><p>This examination allows one attempt only. There is no retake under any circumstances, including failure, cheating/violation termination, browser closure, page refresh, feedback submission, or leaving the examination.</p>
                     <h3>Data &amp; Notifications</h3><p>Your name, email, course, exam data, and feedback will be sent to the Examination Administration.</p>
                     <h3>Single Active Session</h3><p>This exam can only run in one browser tab/window at a time. Opening it elsewhere will lock the duplicate session.</p>
                     <h3>Screen &amp; Identity Watermark</h3><p>A faint, traceable watermark containing your name and a session ID is overlaid on the exam screen for the duration of the test.</p>
@@ -359,7 +416,7 @@
                 <div id="quizScreenInner">
                     <div class="quiz-panel timer-box">
                         <div class="timer-label">Time Remaining</div>
-                        <div class="timer-value" id="timerValue">20:00</div>
+                        <div class="timer-value" id="timerValue">01:00</div>
                         <div class="progress-outer"><div class="progress-inner" id="timerBar"></div></div>
                         <div class="q-nav-title">Questions</div>
                         <div class="q-nav-grid" id="qNavGrid"></div>
@@ -371,7 +428,7 @@
                         <div class="chances-title chances-block-gap">Face</div>
                         <div class="chances-row mini" id="faceChancesRow"></div>
                         <div class="q-course-tag" id="qCourseTag">Course</div>
-                        <div class="q-number" id="qNumber">Question 1 of 30</div>
+                        <div class="q-number" id="qNumber">Question 1 of 45</div>
                         <div class="q-text" id="qText">Loading…</div>
                         <div class="q-options" id="qOptions"></div>
                         <div class="quiz-nav-buttons">
@@ -402,7 +459,7 @@
                     <p>• Your result will be sent to the Examination Administration.</p>
                     <p>• Results will be emailed to your instructor at <b class="highlight">18:00 PST</b>.</p>
                     <p>• If you <b>pass</b>, you may collect your certificate from the institute tomorrow.</p>
-                    <p>• If you <b>fail</b>, better luck next time — review the material and try again.</p>
+                    <p>• If you <b>fail</b>, the examination attempt is final. Administration will review your data.</p>
                     <p style="margin-top:8px;font-size:12px;color:var(--textDim);">🔒 Your result is not shown here for security reasons.</p>
                 </div>
                 <div class="data-notice"><div class="dot"></div><div><b>Your data has been recorded.</b> The administration will process your result.</div></div>
@@ -421,6 +478,20 @@
                 <div class="data-notice"><div class="dot"></div><div><b>Your feedback will be sent to Administration</b> along with your result.</div></div>
                 <div class="email-status-line" id="feedbackEmailStatus"></div>
                 <button class="btn-primary" id="feedbackSubmitBtn">Submit Feedback &amp; Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TESTING BYPASS MODAL ===== -->
+    <div class="testing-modal" id="testingModal">
+        <div class="testing-box">
+            <h3>For Testing</h3>
+            <p>Administration testing access. Enter the testing password to bypass the countdown.</p>
+            <input type="password" id="testingPassword" placeholder="Testing password" autocomplete="off">
+            <div class="testing-error" id="testingError"></div>
+            <div class="testing-actions">
+                <button class="btn-secondary" id="testingCancelBtn">Cancel</button>
+                <button class="btn-primary" id="testingBypassBtn">Bypass</button>
             </div>
         </div>
     </div>
@@ -447,8 +518,8 @@
 // ================================================================
 //  FINAL EXAM — Complete Application
 //  Theme: Green, White, Red
-//  Features: Negative marking (-0.5), Pass mark 24, Email + name retake lock,
-//            Feedback submit lock, Full security suite, Enhanced calibration meters
+//  Features: Registered Name+Email login, fixed exam countdown, testing bypass,
+//            course-specific questions, strict one-attempt lock, full security suite
 // ================================================================
 
 /* ---------- EMAILJS ---------- */
@@ -482,12 +553,12 @@ const State = {
     candidate: { name:'', course:'', courseLabel:'', email:'' },
     quiz: {
         questions: [], answers: [], currentIndex: 0,
-        chancesLeft: 5, faceMisses: 0, timeLeftSec: 1200,
+        chancesLeft: 5, faceMisses: 0, timeLeftSec: 60,
         timerInterval: null, submitted: false, submitReason: 'manual',
         voiceMinAnnounced: new Set()
     },
     feedback: { q1:0, q2:0, q3:0, q4:0 },
-    isRetake: false, examFinished: false, sessionId: '', securityLog: []
+    isRetake: false, examFinished: false, sessionId: '', securityLog: [], countdownInterval: null, testingBypass: false
 };
 
 /* ---------- 30 QUESTION BANKS ---------- */
@@ -528,7 +599,7 @@ const QUESTION_BANKS = {
         ]
     },
     wordpress: {
-        label: "WordPress Fundamentals",
+        label: "WordPress Fundamentals: CONTENT MANAGEMENT SYSTEM",
         questions: [
             { q:"What is WordPress?", opts:["A hardware device like a keyboard","A tool used to build websites and blogs","A type of operating system like Windows","An offline photo editing software"], correct:1 },
             { q:"What is WordPress classified as?", opts:["CMS (Content Management System)","CPU (Central Processing Unit)","GPU (Graphics Processing Unit)","RAM (Random Access Memory)"], correct:0 },
@@ -561,19 +632,89 @@ const QUESTION_BANKS = {
             { q:"Where can you search and install thousands of free plugins directly inside WordPress?", opts:["In the media library tab","In the Plugins → Add New section","In the general settings page","In the user profile menu"], correct:1 },
             { q:"What happens when you put a post into the WordPress 'Trash'?", opts:["It is instantly published to Google","It is moved to a temporary holding folder where you can restore it or delete it forever","It gets converted into a new theme","It turns into an audio file"], correct:1 }
         ]
+    },
+    networking: {
+        label: "DIPLOMA IN COMPUTER NETWORKING",
+        questions: [
+            { type:"fill", q:"The CPU component responsible for directing timing signals and managing the flow of data is the __________.", answer:"Control Unit" },
+            { type:"fill", q:"In the CPU machine cycle, saving the final calculated result into registers or RAM is called the __________ stage.", answer:"Store" },
+            { type:"fill", q:"Operation timing and execution speed across CPU components are synchronized by pulses from the __________.", answer:"System Clock" },
+            { type:"fill", q:"Memory that loses all its stored data as soon as system power turns off is referred to as __________ memory.", answer:"Volatile" },
+            { type:"fill", q:"The time delay between sending a request for data to memory and receiving that data is known as __________.", answer:"Latency" },
+            { type:"fill", q:"Ultra-fast SRAM memory located extremely close to the CPU to hold frequently used data is called __________.", answer:"Cache" },
+            { type:"fill", q:"When the CPU searches for data in Cache but cannot find it, causing a fetch from RAM, it is called a __________.", answer:"Cache Miss" },
+            { type:"fill", q:"The embedded microprocessor that acts as the brain of an SSD to manage read and write operations is the __________.", answer:"SSD Controller" },
+            { type:"fill", q:"In NAND Flash memory, data is written and read at the Page level, but must be erased at the __________ level.", answer:"Block" },
+            { type:"fill", q:"The command that helps maintain SSD speed by letting the drive erase deleted blocks in the background is __________.", answer:"TRIM" },
+            { type:"fill", q:"To prevent individual NAND memory cells from wearing out early due to repetitive writes, controllers use __________ technology.", answer:"Wear Leveling" },
+            { type:"fill", q:"Memory that can be programmed only once after manufacturing and cannot be erased later is __________.", answer:"PROM" },
+            { type:"fill", q:"Modern PC systems use __________ as an advanced, secure firmware standard to replace legacy BIOS.", answer:"UEFI" },
+            { type:"fill", q:"Flash memory that allows random byte-level access and is optimal for firmware code execution is __________ Flash.", answer:"NOR" },
+            { type:"fill", q:"A physical address permanently burned into a network interface card by the manufacturer is a __________ address.", answer:"MAC" },
+            { type:"fill", q:"An IPv4 address is composed of __________ bits divided into network and host parts.", answer:"32" },
+            { type:"fill", q:"The process of selecting the best path to forward data packets from source to destination across a network is __________.", answer:"Routing" },
+            { type:"fill", q:"The protocol that provides secure, encrypted web browsing over the internet is __________.", answer:"HTTPS" },
+            { type:"fill", q:"End-to-end data delivery and error checking using TCP or UDP are handled at the __________ layer of the OSI model.", answer:"Transport" },
+            { type:"fill", q:"The theoretical maximum amount of data that can be transferred across a system bus per second is called __________.", answer:"Bandwidth" },
+            { type:"fill", q:"The network protocol used specifically for sending electronic mail across networks is __________.", answer:"SMTP" },
+            { type:"fill", q:"Ultra-fast local storage inside the CPU holding active under-process data and instructions is called __________.", answer:"Registers" },
+            { type:"fill", q:"The practical 4-layer network model used on the modern internet is the __________ model.", answer:"TCP/IP" },
+            { type:"fill", q:"Memory permanently written at the factory level during hardware manufacturing is known as __________ ROM.", answer:"Mask" },
+            { type:"fill", q:"The number of bits carried simultaneously in a single transfer cycle across a bus is called __________.", answer:"Bus Width" },
+
+            { q:"If the CPU needs to add two numbers stored in its registers, which internal component performs this arithmetic operation?", opts:["Control Unit","Arithmetic Logic Unit (ALU)","System Clock"], correct:1 },
+            { q:"What would happen if the CPU's Control Unit stops functioning?", opts:["Math calculations would give wrong results.","Instructions would not be coordinated or directed to the right components.","Saved files in RAM would be permanently deleted."], correct:1 },
+            { q:"Why is Cache memory placed closer to the CPU than RAM?", opts:["To permanently store operating system files.","To reduce the waiting time when fetching frequently used data.","To increase the overall storage capacity of the computer."], correct:1 },
+            { q:"During which phase of the machine cycle does the CPU interpret what action an instruction requires?", opts:["Fetch","Decode","Store"], correct:1 },
+            { q:"If power is suddenly cut off from the computer, what happens to the data inside RAM?", opts:["It remains saved safely.","It is moved automatically to CPU registers.","It is completely lost because RAM is volatile."], correct:2 },
+            { q:"Why does DRAM require a periodic \"refresh\" operation while SRAM does not?", opts:["DRAM uses capacitors that slowly leak electrical charge.","DRAM contains permanent system firmware.","DRAM is located inside the CPU core."], correct:0 },
+            { q:"How does doubling the Bus Width (e.g., from 32-bit to 64-bit) impact performance?", opts:["It doubles the speed of the System Clock.","It allows twice as much data to be transferred in a single cycle.","It cuts the RAM storage capacity in half."], correct:1 },
+            { q:"When the CPU requests data and successfully finds it in the Cache, what is this called?", opts:["Cache Miss","Cache Hit","Memory Refresh"], correct:1 },
+            { q:"Why is a Solid State Drive (SSD) significantly faster than a traditional Hard Disk Drive (HDD)?", opts:["SSDs use mechanical magnetic platters rotating at high speed.","SSDs transfer data using pure electrical signals without moving parts.","SSDs do not require an internal controller."], correct:1 },
+            { q:"In NAND Flash memory, how do Read/Write operations differ from Erase operations?", opts:["Read/Write happens at Page level, while Erase happens at Block level.","Read/Write happens at Block level, while Erase happens at Page level.","Both operations happen only at the individual Cell level."], correct:0 },
+            { q:"Why is the TRIM command essential for maintaining SSD write performance over time?", opts:["It expands the physical memory size of NAND chips.","It informs the SSD controller about deleted data so blocks can be cleaned in advance.","It converts volatile memory into non-volatile storage."], correct:1 },
+            { q:"What problem does the \"Wear Leveling\" algorithm solve in SSDs?", opts:["It prevents data loss during sudden power outages.","It prevents specific memory blocks from wearing out early by distributing write cycles evenly.","It increases the speed of the system bus clock."], correct:1 },
+            { q:"Why must core system initialization code (BIOS/UEFI) be stored in ROM/Flash memory instead of RAM?", opts:["Because RAM is too small to store firmware.","Because RAM loses its content when the system is powered off.","Because CPU registers cannot communicate with RAM directly."], correct:1 },
+            { q:"How does EEPROM differ from traditional EPROM?", opts:["EEPROM is erased using electrical signals, while EPROM requires Ultraviolet (UV) light.","EEPROM is volatile memory, while EPROM is non-volatile memory.","EEPROM can only be programmed once at the factory."], correct:0 },
+            { q:"What is the main job of the Flash Translation Layer (FTL) in an SSD controller?", opts:["To translate domain names into IP addresses.","To translate Logical Block Addresses (LBA) from OS into Physical Block Addresses (PBA) on Flash memory.","To convert electrical signals into wireless radio waves."], correct:1 },
+            { q:"Why is a MAC address considered a permanent physical address compared to an IP address?", opts:["MAC addresses change every time you connect to a new Wi-Fi router.","MAC addresses are dynamically provided by dynamic web servers.","MAC addresses are hardcoded into the network interface card by the manufacturer."], correct:2 },
+            { q:"Which protocol translates user-friendly domain names (like google.com) into IP addresses?", opts:["HTTP","DNS","FTP"], correct:1 },
+            { q:"What is the main objective of \"Subnetting\" in computer networks?", opts:["To merge multiple physical routers into one device.","To divide a large network into smaller sub-networks to reduce IP wastage and improve performance.","To convert digital signals to analog sound waves."], correct:1 },
+            { q:"Which OSI layer acts as the \"heart\" of the model by guaranteeing reliable end-to-end data transmission using TCP?", opts:["Physical Layer","Network Layer","Transport Layer"], correct:2 },
+            { q:"What is the key difference between NOR Flash and NAND Flash memory?", opts:["NOR Flash supports random byte access for direct code execution, while NAND Flash is designed for block-level mass storage.","NOR Flash loses data when power is turned off, while NAND Flash retains data.","NOR Flash is used only in CPU registers, while NAND Flash is used in RAM."], correct:0 }
+        ]
     }
 };
 
-/* ---------- RETAKE TRACKING (email + name + course) ---------- */
-const ATTEMPTS_KEY = 'examPortalAttempts_v3';
+/* ---------- STRICT ONE-ATTEMPT TRACKING ---------- */
+const ATTEMPTS_KEY = 'examPortalAttempts_v4_strict';
 function loadAttemptsStore() { try { const r = localStorage.getItem(ATTEMPTS_KEY); return r ? JSON.parse(r) : {}; } catch(_) { return {}; } }
 function saveAttemptsStore(s) { try { localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(s)); } catch(_) {} }
-function makeAttemptKey(email, name, course) {
-    return (email||'').trim().toLowerCase() + '|' + (name||'').trim().toUpperCase() + '|' + course;
+function makeAttemptKey(email, name) {
+    return (email||'').trim().toLowerCase() + '|' + (name||'').trim().toUpperCase();
 }
 function getAttemptRecord(key) { return loadAttemptsStore()[key] || null; }
 function setAttemptRecord(key, data) { const s = loadAttemptsStore(); s[key] = data; saveAttemptsStore(s); }
-
+function consumeAttempt(reason) {
+    const key = makeAttemptKey(State.candidate.email, State.candidate.name);
+    setAttemptRecord(key, {
+        status:'USED',
+        course:State.candidate.course,
+        courseLabel:State.candidate.courseLabel,
+        reason:reason || 'attempt_started',
+        usedAt:new Date().toISOString(),
+        sessionId:State.sessionId || ''
+    });
+}
+function isAttemptUsed() {
+    return !!getAttemptRecord(makeAttemptKey(State.candidate.email, State.candidate.name));
+}
+function showNoChanceMessage(target) {
+    const el = target || $('regBlockMsg');
+    if (!el) return;
+    el.textContent = 'You have no chance. Administration reviewing your data.';
+    el.classList.remove('hidden');
+}
 /* ---------- HELPERS ---------- */
 const $ = id => document.getElementById(id);
 function showScreen(el) {
@@ -617,20 +758,56 @@ function stopAllCameras() {
     setInterval(draw, 40);
 })();
 
-/* ---------- LOGIN ---------- */
-const VALID_KEY = "EXAM2026";
+/* ---------- REGISTERED STUDENT ACCESS ---------- */
+const REGISTERED_STUDENTS = {
+    "reeba shabbir": { email:"tsssofficial2222.student002@gmail.com", course:"networking" },
+    "faizan saif": { email:"tsssofficial2222.student015@gmail.com", course:"wordpress" },
+    "hira saif": { email:"tsssofficial2222.student016@gmail.com", course:"networking" },
+    "noman ali": { email:"tsssofficial2222.student017@gmail.com", course:"networking" },
+    "hamid mukhtar": { email:"tsssofficial2222.student018@gmail.com", course:"wordpress" },
+    "menahil ahsanullah": { email:"tsssofficial2222.student020@gmail.com", course:"networking" },
+    "ariba nazir": { email:"tsssofficial2222.student021@gmail.com", course:"wordpress" }
+};
+const EXAM_OPEN_AT = new Date('2026-08-28T11:00:00+05:00').getTime();
+const TESTING_PASSWORD = 'OPND2026@';
+
+function normalizeName(v) { return (v||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+function normalizeEmail(v) { return (v||'').trim().toLowerCase(); }
+
+function findRegisteredStudent(name,email) {
+    const n = normalizeName(name), e = normalizeEmail(email);
+    const rec = REGISTERED_STUDENTS[n];
+    if (!rec || normalizeEmail(rec.email) !== e) return null;
+    return { name:name.trim().replace(/\s+/g,' '), email:rec.email, course:rec.course };
+}
+
 function attemptLogin() {
-    const val = $('keyInput').value.trim(), err = $('loginError');
-    if (!val) { err.textContent = "Please enter your key."; return; }
-    if (val.toUpperCase() !== VALID_KEY) {
-        err.textContent = "Invalid key. Access denied.";
-        $('keyInput').value = ''; $('keyInput').focus();
+    const name = $('loginNameInput').value.trim();
+    const email = $('loginEmailInput').value.trim();
+    const err = $('loginError');
+    err.textContent = '';
+    if (!name || !email) { err.textContent = 'Name and email are both required.'; return; }
+    const student = findRegisteredStudent(name,email);
+    if (!student) {
+        err.textContent = 'Name and email do not match a registered applicant.';
         return;
     }
-    err.textContent = ''; openPortal();
+    const attemptKey = makeAttemptKey(student.email, student.name);
+    if (getAttemptRecord(attemptKey)) {
+        err.textContent = 'You have no chance. Administration reviewing your data.';
+        return;
+    }
+    State.candidate.name = student.name;
+    State.candidate.email = student.email;
+    State.candidate.course = student.course;
+    State.candidate.courseLabel = QUESTION_BANKS[student.course].label;
+    err.textContent = '';
+    openPortal();
 }
 $('loginSubmitBtn').addEventListener('click', attemptLogin);
-$('keyInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+$('loginNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginEmailInput').focus(); });
+$('loginEmailInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+$('loginNameInput').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
 
 /* ---------- PORTAL ---------- */
 function requestFS() {
@@ -647,60 +824,121 @@ function openPortal() {
     document.getElementById('loginScreen').classList.remove('active');
     document.getElementById('portalShell').classList.add('active');
     requestFS();
-    resetRegForm(); showScreen($('regScreen'));
-    FaceEngine.loadModels(); generateSessionId(); acquireSingleSessionLock(); startIntegrityWatch();
+    generateSessionId(); acquireSingleSessionLock(); startIntegrityWatch();
+    showCountdownScreen();
 }
 function closePortal() {
+    if (isInQuiz() && !State.quiz.submitted) {
+        consumeAttempt('portal_closed_during_test');
+        quizLocked = true;
+        stopQuizTimer(); stopAllCameras(); stopWatermark(); stopIdleWatch(); stopDevToolsWatch();
+        showSecurityLockout('ACCESS BLOCKED','You have no chance. Administration reviewing your data.');
+        return;
+    }
+    stopCountdown();
     stopQuizTimer(); stopAllCameras(); stopWatermark(); stopIntegrityWatch(); stopIdleWatch();
     stopDevToolsWatch(); releaseSingleSessionLock(); exitFS();
     document.getElementById('portalShell').classList.remove('active');
     document.getElementById('loginScreen').classList.add('active');
-    $('keyInput').value = ''; $('loginError').textContent = ''; resetEverything();
+    $('loginNameInput').value = ''; $('loginEmailInput').value = ''; $('loginError').textContent = '';
+    resetEverything();
 }
-$('backBtn').addEventListener('click', () => { if (confirm('Close the portal and return to login?')) closePortal(); });
+$('backBtn').addEventListener('click', () => {
+    if (isInQuiz() && !State.quiz.submitted) {
+        consumeAttempt('close_button_during_test');
+        stopQuizTimer(); stopAllCameras(); stopWatermark(); stopIdleWatch(); stopDevToolsWatch();
+        showSecurityLockout('ACCESS BLOCKED','You have no chance. Administration reviewing your data.');
+        return;
+    }
+    if (confirm('Close the portal and return to login?')) closePortal();
+});
 
 function resetEverything() {
+    stopCountdown();
     State.candidate = { name:'', course:'', courseLabel:'', email:'' };
-    State.quiz = { questions:[], answers:[], currentIndex:0, chancesLeft:5, faceMisses:0, timeLeftSec:1200, timerInterval:null, submitted:false, submitReason:'manual', voiceMinAnnounced:new Set() };
-    State.feedback = { q1:0, q2:0, q3:0, q4:0 }; State.isRetake = false; State.examFinished = false;
-    resetRegForm(); $('acceptCheckbox').checked = false; $('acceptBtn').disabled = true;
+    State.quiz = { questions:[], answers:[], currentIndex:0, chancesLeft:5, faceMisses:0, timeLeftSec:60, timerInterval:null, submitted:false, submitReason:'manual', voiceMinAnnounced:new Set(), questionStartedAt:0 };
+    State.feedback = { q1:0, q2:0, q3:0, q4:0 };
+    State.isRetake = false; State.examFinished = false; State.testingBypass = false;
+    $('acceptCheckbox').checked = false; $('acceptBtn').disabled = true;
     if ($('submittedBox')) $('submittedBox').innerHTML = DEFAULT_SUBMITTED_BOX_HTML;
+    $('testingModal').classList.remove('show');
+    $('testingPassword').value = ''; $('testingError').textContent = '';
 }
-function resetRegForm() {
-    $('fullNameInput').value = ''; $('courseSelect').value = ''; $('emailInput').value = '';
-    $('fullNameErr').textContent = ''; $('courseErr').textContent = ''; $('emailErr').textContent = '';
-    $('regBlockMsg').classList.add('hidden'); $('regBlockMsg').textContent = '';
+function showCountdownScreen() {
+    renderCountdownIdentity();
+    showScreen($('countdownScreen'));
+    startCountdown();
 }
-function validateEmail(e) { return /^[^\s@]+@gmail\.com$/i.test(e.trim()); }
-$('fullNameInput').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
-
-$('regNextBtn').addEventListener('click', () => {
-    let ok = true;
-    const name = $('fullNameInput').value.trim(), course = $('courseSelect').value, email = $('emailInput').value.trim();
-    $('fullNameErr').textContent = ''; $('courseErr').textContent = ''; $('emailErr').textContent = ''; $('regBlockMsg').classList.add('hidden');
-    if (!name) { $('fullNameErr').textContent = 'Full name is required.'; ok = false; }
-    if (!course) { $('courseErr').textContent = 'Please select a course.'; ok = false; }
-    if (!email) { $('emailErr').textContent = 'Gmail address is required.'; ok = false; }
-    else if (!validateEmail(email)) { $('emailErr').textContent = 'Please enter a valid Gmail address.'; ok = false; }
-    if (!ok) return;
-
-    const key = makeAttemptKey(email, name, course);
-    const rec = getAttemptRecord(key);
-    if (rec) {
-        if (rec.result === 'PASS') {
-            $('regBlockMsg').textContent = "You have already passed this test. No further attempts allowed.";
-            $('regBlockMsg').classList.remove('hidden'); return;
-        }
-        if (rec.result === 'FAIL' && rec.retakeUsed) {
-            $('regBlockMsg').textContent = "You already used your one retake and did not pass. No further attempts. Please speak with your instructor.";
-            $('regBlockMsg').classList.remove('hidden'); return;
-        }
-        State.isRetake = (rec.result === 'FAIL' && !rec.retakeUsed);
-    } else {
-        State.isRetake = false;
+function renderCountdownIdentity() {
+    $('countdownCourse').textContent = State.candidate.courseLabel;
+    $('countdownStudent').textContent = State.candidate.name + ' • ' + State.candidate.email;
+}
+function updateCountdownUI() {
+    const diff = Math.max(0, EXAM_OPEN_AT - Date.now());
+    const totalSec = Math.floor(diff/1000);
+    const days = Math.floor(totalSec/86400);
+    const hours = Math.floor((totalSec%86400)/3600);
+    const mins = Math.floor((totalSec%3600)/60);
+    const secs = totalSec%60;
+    $('cdDays').textContent = String(days).padStart(2,'0');
+    $('cdHours').textContent = String(hours).padStart(2,'0');
+    $('cdMinutes').textContent = String(mins).padStart(2,'0');
+    $('cdSeconds').textContent = String(secs).padStart(2,'0');
+    if (diff <= 0) {
+        $('countdownStatus').textContent = 'Examination access is now open.';
+        stopCountdown();
+        showConfirmationScreen();
     }
-    State.candidate.name = name; State.candidate.course = course;
-    State.candidate.courseLabel = QUESTION_BANKS[course].label; State.candidate.email = email;
+}
+function startCountdown() {
+    stopCountdown();
+    updateCountdownUI();
+    if (Date.now() < EXAM_OPEN_AT) State.countdownInterval = setInterval(updateCountdownUI,1000);
+}
+function stopCountdown() {
+    if (State.countdownInterval) { clearInterval(State.countdownInterval); State.countdownInterval=null; }
+}
+function showConfirmationScreen() {
+    stopCountdown();
+    $('confirmName').textContent = State.candidate.name;
+    $('confirmEmail').textContent = State.candidate.email;
+    $('confirmCourse').textContent = State.candidate.courseLabel;
+    $('regBlockMsg').classList.add('hidden');
+    showScreen($('regScreen'));
+}
+function bypassCountdownForTesting() {
+    State.testingBypass = true;
+    stopCountdown();
+    showConfirmationScreen();
+    $('countdownStatus').textContent = 'Testing bypass active.';
+}
+$('testingHotspot').addEventListener('click', () => {
+    if (!document.getElementById('portalShell').classList.contains('active')) return;
+    $('testingError').textContent = '';
+    $('testingPassword').value = '';
+    $('testingModal').classList.add('show');
+    setTimeout(() => $('testingPassword').focus(),50);
+});
+$('testingCancelBtn').addEventListener('click', () => $('testingModal').classList.remove('show'));
+$('testingBypassBtn').addEventListener('click', () => {
+    if ($('testingPassword').value === TESTING_PASSWORD) {
+        $('testingModal').classList.remove('show');
+        bypassCountdownForTesting();
+    } else {
+        $('testingError').textContent = 'Incorrect testing password.';
+        $('testingPassword').value = '';
+        $('testingPassword').focus();
+    }
+});
+$('testingPassword').addEventListener('keydown', e => { if(e.key==='Enter') $('testingBypassBtn').click(); });
+
+/* ---------- DETAILS CONFIRMATION ---------- */
+$('regNextBtn').addEventListener('click', () => {
+    if (!State.candidate.name || !State.candidate.email || !State.candidate.course) return;
+    if (isAttemptUsed()) {
+        showNoChanceMessage($('regBlockMsg'));
+        return;
+    }
     showScreen($('termsScreen'));
 });
 
@@ -881,56 +1119,148 @@ let noFaceSince = null, extraFaceSince = null, lastViolationTs = 0, quizLocked =
 
 function buildQuiz() {
     const bank = QUESTION_BANKS[State.candidate.course];
-    const qs = bank.questions.map(q => ({...q}));
+    const qs = bank.questions.map(q => ({...q, opts:q.opts ? [...q.opts] : undefined}));
     const seed = State.candidate.name.trim().toUpperCase() + '|' + State.candidate.course;
     let h = 0; for (let i=0; i<seed.length; i++) h = (Math.imul(31,h) + seed.charCodeAt(i)) | 0;
     const rand = mulberry32(h);
-    for (let i=qs.length-1; i>0; i--) { const j = Math.floor(rand()*(i+1)); [qs[i], qs[j]] = [qs[j], qs[i]]; }
-    State.quiz.questions = qs; State.quiz.answers = new Array(qs.length).fill(null);
-    State.quiz.currentIndex = 0; State.quiz.chancesLeft = 5; State.quiz.faceMisses = 0;
-    State.quiz.timeLeftSec = 1200; State.quiz.voiceMinAnnounced = new Set(); State.quiz.submitted = false;
-    quizLocked = false; noFaceSince = null; extraFaceSince = null; lastViolationTs = 0;
+    for (let i=qs.length-1; i>0; i--) { const j=Math.floor(rand()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
+    State.quiz.questions=qs;
+    State.quiz.answers=new Array(qs.length).fill(null);
+    State.quiz.currentIndex=0;
+    State.quiz.chancesLeft=5;
+    State.quiz.faceMisses=0;
+    State.quiz.timeLeftSec=60;
+    State.quiz.questionStartedAt=Date.now();
+    State.quiz.voiceMinAnnounced=new Set();
+    State.quiz.submitted=false;
+    quizLocked=false; noFaceSince=null; extraFaceSince=null; lastViolationTs=0;
 }
 function mulberry32(a) { return function() { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ a>>>15, 1|a); t = (t + Math.imul(t ^ t>>>7, 61|t)) ^ t; return ((t ^ t>>>14) >>> 0) / 4294967296; }; }
 
 async function beginQuiz() {
+    if (isAttemptUsed()) { showNoChanceMessage($('regBlockMsg')); return; }
+    consumeAttempt('exam_started');
     buildQuiz(); shuffleAllOptions();
     showScreen($('quizScreen')); document.getElementById('quizScreen').classList.remove('hidden');
     renderQNav(); renderQuestion(); renderChances(); renderFaceChances();
     startQuizCamera(); startQuizTimer(); startWatermark(); startIdleWatch(); startDevToolsWatch();
     renderSessionStrip();
-    speak('You have 20 minutes for 30 questions. Please remain silent and keep your face visible at all times. Good luck.');
+    speak('You have one minute for each question. Please remain silent and keep your face visible at all times. Good luck.');
 }
 
-/* ---------- TIMER ---------- */
-function formatTime(s) { const m = Math.floor(s/60).toString().padStart(2,'0'), sec = (s%60).toString().padStart(2,'0'); return m+':'+sec; }
-function startQuizTimer() { updateTimerUI(); State.quiz.timerInterval = setInterval(() => { if (quizLocked) return; State.quiz.timeLeftSec--; if (State.quiz.timeLeftSec <= 0) { State.quiz.timeLeftSec = 0; updateTimerUI(); stopQuizTimer(); finalizeSubmission('time'); return; } updateTimerUI(); if (State.quiz.timeLeftSec%60 === 0) { const mins = State.quiz.timeLeftSec/60; if (mins>0 && !State.quiz.voiceMinAnnounced.has(mins)) { State.quiz.voiceMinAnnounced.add(mins); speak(mins+' minute'+(mins>1?'s':'')+' remaining'); } } }, 1000); }
-function stopQuizTimer() { if (State.quiz.timerInterval) { clearInterval(State.quiz.timerInterval); State.quiz.timerInterval = null; } }
-function updateTimerUI() { $('timerValue').textContent = formatTime(State.quiz.timeLeftSec); $('timerBar').style.width = (State.quiz.timeLeftSec/1200*100)+'%'; $('timerValue').classList.toggle('low', State.quiz.timeLeftSec <= 60); }
-
+/* ---------- PER-QUESTION TIMER (60 SECONDS) ---------- */
+function formatTime(s) {
+    const m = Math.floor(s/60).toString().padStart(2,'0');
+    const sec = (s%60).toString().padStart(2,'0');
+    return m+':'+sec;
+}
+function startQuizTimer() {
+    stopQuizTimer();
+    State.quiz.timeLeftSec = 60;
+    State.quiz.questionStartedAt = Date.now();
+    updateTimerUI();
+    State.quiz.timerInterval = setInterval(() => {
+        if (quizLocked) return;
+        State.quiz.timeLeftSec--;
+        if (State.quiz.timeLeftSec <= 0) {
+            State.quiz.timeLeftSec = 0;
+            updateTimerUI();
+            stopQuizTimer();
+            autoAdvanceAfterTimeout();
+            return;
+        }
+        updateTimerUI();
+    },1000);
+}
+function stopQuizTimer() {
+    if (State.quiz.timerInterval) { clearInterval(State.quiz.timerInterval); State.quiz.timerInterval=null; }
+}
+function resetQuestionTimer() {
+    stopQuizTimer();
+    State.quiz.timeLeftSec = 60;
+    State.quiz.questionStartedAt = Date.now();
+    updateTimerUI();
+    if (!quizLocked && !State.quiz.submitted) {
+        State.quiz.timerInterval = setInterval(() => {
+            if (quizLocked) return;
+            State.quiz.timeLeftSec--;
+            if (State.quiz.timeLeftSec <= 0) {
+                State.quiz.timeLeftSec = 0;
+                updateTimerUI();
+                stopQuizTimer();
+                autoAdvanceAfterTimeout();
+                return;
+            }
+            updateTimerUI();
+        },1000);
+    }
+}
+function autoAdvanceAfterTimeout() {
+    if (quizLocked || State.quiz.submitted) return;
+    if (State.quiz.currentIndex < State.quiz.questions.length-1) {
+        State.quiz.currentIndex++;
+        renderQuestion();
+        resetQuestionTimer();
+    } else {
+        finalizeSubmission('time');
+    }
+}
+function updateTimerUI() {
+    $('timerValue').textContent = formatTime(Math.max(0,State.quiz.timeLeftSec));
+    $('timerBar').style.width = (Math.max(0,State.quiz.timeLeftSec)/60*100)+'%';
+    $('timerValue').classList.toggle('low', State.quiz.timeLeftSec <= 10);
+}
 /* ---------- QUIZ RENDER ---------- */
 function renderQNav() { const grid = $('qNavGrid'); grid.innerHTML = ''; State.quiz.questions.forEach((_,i) => { const d = document.createElement('div'); d.className = 'q-nav-dot'; d.textContent = i+1; d.addEventListener('click', ()=>{ State.quiz.currentIndex = i; renderQuestion(); }); grid.appendChild(d); }); }
 function updateQNav() { document.querySelectorAll('.q-nav-dot').forEach((d,i) => { d.classList.toggle('answered', State.quiz.answers[i]!==null); d.classList.toggle('current', i===State.quiz.currentIndex); }); }
 function renderChances() { const row = $('chancesRow'); row.innerHTML = ''; for (let i=0; i<5; i++) { const h = document.createElement('div'); h.className = 'chance-heart ' + (i < State.quiz.chancesLeft ? 'ok' : 'lost'); row.appendChild(h); } }
 function renderFaceChances() { const row = $('faceChancesRow'); if (!row) return; row.innerHTML = ''; const left = Math.max(0, 2-State.quiz.faceMisses); for (let i=0; i<2; i++) { const h = document.createElement('div'); h.className = 'chance-heart ' + (i < left ? 'ok' : 'lost'); row.appendChild(h); } }
 const LETTERS = ['A','B','C','D'];
+function normalizeAnswer(v) {
+    return (v||'').trim().replace(/\s+/g,' ').toLowerCase();
+}
+function isFillCorrect(q, answer) {
+    return normalizeAnswer(answer) === normalizeAnswer(q.answer);
+}
 function renderQuestion() {
-    const idx = State.quiz.currentIndex, q = State.quiz.questions[idx];
-    $('qCourseTag').textContent = State.candidate.courseLabel; $('qNumber').textContent = 'Question '+(idx+1)+' of '+State.quiz.questions.length;
-    $('qText').textContent = q.q;
-    const wrap = $('qOptions'); wrap.innerHTML = '';
-    q.opts.forEach((opt,i) => {
-        const el = document.createElement('div'); el.className = 'q-option' + (State.quiz.answers[idx]===i?' selected':'');
-        el.innerHTML = '<div class="opt-letter">'+LETTERS[i]+'</div><div>'+opt+'</div>';
-        el.addEventListener('click', () => { State.quiz.answers[idx] = i; renderQuestion(); updateQNav(); });
-        wrap.appendChild(el);
-    });
-    $('prevBtn').disabled = idx === 0; $('prevBtn').style.opacity = idx===0 ? 0.4 : 1;
-    const last = idx === State.quiz.questions.length-1; $('nextQBtn').classList.toggle('hidden', last); $('finishBtn').classList.toggle('hidden', !last);
+    const idx=State.quiz.currentIndex, q=State.quiz.questions[idx];
+    $('qCourseTag').textContent=State.candidate.courseLabel;
+    $('qNumber').textContent='Question '+(idx+1)+' of '+State.quiz.questions.length;
+    $('qText').textContent=q.q;
+    const wrap=$('qOptions'); wrap.innerHTML='';
+    const typeBadge=document.createElement('div');
+    typeBadge.className='question-type-badge';
+    typeBadge.textContent=q.type==='fill' ? 'Fill in the Blank' : 'Multiple Choice';
+    wrap.appendChild(typeBadge);
+    if (q.type==='fill') {
+        const holder=document.createElement('div'); holder.className='fill-answer-wrap';
+        const input=document.createElement('input'); input.type='text'; input.className='fill-answer-input';
+        input.placeholder='Type your answer here...'; input.autocomplete='off';
+        input.value=State.quiz.answers[idx]===null ? '' : State.quiz.answers[idx];
+        input.addEventListener('input',()=>{ State.quiz.answers[idx]=input.value; updateQNav(); });
+        input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); if(idx<State.quiz.questions.length-1) { State.quiz.currentIndex++; renderQuestion(); resetQuestionTimer(); } else { finalizeSubmission('manual'); } }});
+        holder.appendChild(input); wrap.appendChild(holder);
+        const note=document.createElement('div'); note.className='per-question-note'; note.textContent='Enter the missing term, then continue.';
+        wrap.appendChild(note);
+        setTimeout(()=>input.focus(),50);
+    } else {
+        q.opts.forEach((opt,i)=>{
+            const el=document.createElement('div');
+            el.className='q-option'+(State.quiz.answers[idx]===i?' selected':'');
+            el.innerHTML='<div class="opt-letter">'+LETTERS[i]+'</div><div>'+opt+'</div>';
+            el.addEventListener('click',()=>{ State.quiz.answers[idx]=i; renderQuestion(); updateQNav(); });
+            wrap.appendChild(el);
+        });
+    }
+    $('prevBtn').disabled=idx===0;
+    $('prevBtn').style.opacity=idx===0?0.4:1;
+    const last=idx===State.quiz.questions.length-1;
+    $('nextQBtn').classList.toggle('hidden',last);
+    $('finishBtn').classList.toggle('hidden',!last);
     updateQNav();
 }
-$('prevBtn').addEventListener('click', () => { if (State.quiz.currentIndex>0) { State.quiz.currentIndex--; renderQuestion(); } });
-$('nextQBtn').addEventListener('click', () => { if (State.quiz.currentIndex < State.quiz.questions.length-1) { State.quiz.currentIndex++; renderQuestion(); } });
+$('prevBtn').addEventListener('click', () => { if (State.quiz.currentIndex>0) { State.quiz.currentIndex--; renderQuestion(); resetQuestionTimer(); } });
+$('nextQBtn').addEventListener('click', () => { if (State.quiz.currentIndex < State.quiz.questions.length-1) { State.quiz.currentIndex++; renderQuestion(); resetQuestionTimer(); } });
 $('finishBtn').addEventListener('click', () => { if (confirm('Are you sure you want to finish the exam?')) { stopQuizTimer(); finalizeSubmission('manual'); } });
 
 /* ---------- QUIZ CAMERA + MIC (enhanced grace periods) ---------- */
@@ -1013,12 +1343,21 @@ function flashCheatWarning() { const flash = $('cheatFlash'); flash.classList.ad
 
 /* ---------- FINALIZE (with negative marking) ---------- */
 function calcScore() {
-    let correct = 0, incorrect = 0;
-    State.quiz.questions.forEach((q,i) => { if (State.quiz.answers[i] === q.correct) correct++; else if (State.quiz.answers[i] !== null) incorrect++; });
-    const netScore = Math.max(0, correct - (incorrect * 0.5));
-    const total = State.quiz.questions.length;
-    const pct = Math.round((netScore / total) * 100);
-    return { correct, incorrect, netScore, total, pct };
+    let correct=0, incorrect=0;
+    State.quiz.questions.forEach((q,i)=>{
+        const ans=State.quiz.answers[i];
+        if(q.type==='fill') {
+            if(ans!==null && isFillCorrect(q,ans)) correct++;
+            else if(ans!==null && String(ans).trim()!=='') incorrect++;
+        } else {
+            if(ans===q.correct) correct++;
+            else if(ans!==null) incorrect++;
+        }
+    });
+    const netScore=Math.max(0,correct-(incorrect*0.5));
+    const total=State.quiz.questions.length;
+    const pct=Math.round((netScore/total)*100);
+    return {correct,incorrect,netScore,total,pct};
 }
 const DEFAULT_SUBMITTED_BOX_HTML = $('submittedBox') ? $('submittedBox').innerHTML : '';
 function finalizeSubmission(reason) {
@@ -1029,8 +1368,9 @@ function finalizeSubmission(reason) {
 
     const { netScore } = calcScore();
     const { passed } = getPassStatus(netScore);
-    const key = makeAttemptKey(State.candidate.email, State.candidate.name, State.candidate.course);
-    setAttemptRecord(key, { result: passed ? 'PASS' : 'FAIL', retakeUsed: State.isRetake ? true : false });
+    const key = makeAttemptKey(State.candidate.email, State.candidate.name);
+    const existing = getAttemptRecord(key) || {};
+    setAttemptRecord(key, { ...existing, status:'USED', result:passed?'PASS':'FAIL', finalReason:State.quiz.submitReason, completedAt:new Date().toISOString(), score:netScore });
     speak('Your exam has been submitted.');
 
     const box = $('submittedBox');
@@ -1171,7 +1511,7 @@ document.addEventListener('dragstart', e => { if(isInQuiz()) e.preventDefault();
 document.addEventListener('drop', e => { if(isInQuiz()) e.preventDefault(); });
 document.addEventListener('dragover', e => { if(isInQuiz()) e.preventDefault(); });
 window.addEventListener('offline', () => { if(!isInQuiz()) return; logViolationEvent('network','Connection lost'); stopQuizTimer(); });
-window.addEventListener('online', () => { if(!isInQuiz()||State.quiz.submitted) return; if(!quizLocked) startQuizTimer(); });
+window.addEventListener('online', () => { if(!isInQuiz()||State.quiz.submitted) return; if(!quizLocked) resetQuestionTimer(); });
 async function detectMultiMonitorSetup() { try { if(window.screen&&window.screen.isExtended) logViolationEvent('multi_monitor','Multiple displays detected'); } catch(_){} }
 function shuffleOptionsForQuestion(q, rand) {
     const opts = q.opts.map((text,i)=>({text, isCorrect:i===q.correct}));
@@ -1202,9 +1542,9 @@ startClipboardGuard();
 document.addEventListener('selectstart', e=>{ if(isInQuiz()) e.preventDefault(); });
 
 /* ---------- INIT ---------- */
-window.addEventListener('DOMContentLoaded', ()=>{ $('keyInput').focus(); });
+window.addEventListener('DOMContentLoaded', ()=>{ $('loginNameInput').focus(); });
 setTimeout(()=>FaceEngine.loadModels(), 1000);
 console.log('🔒 Final Exam portal loaded. Green/White/Red theme. Negative marking active. Pass mark 24. Enhanced face calibration. 10+ security functions armed.');
 </script>
 </body>
-                            </html>
+    </html>
