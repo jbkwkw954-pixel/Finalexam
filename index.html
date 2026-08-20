@@ -718,8 +718,12 @@ function showNoChanceMessage(target) {
 /* ---------- HELPERS ---------- */
 const $ = id => document.getElementById(id);
 function showScreen(el) {
-    document.querySelectorAll('#portalBody > .card, #portalBody > #quizScreen').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('#portalBody > .card, #portalBody > #quizScreen').forEach(s => {
+        s.classList.add('hidden');
+        s.style.display = 'none';
+    });
     el.classList.remove('hidden');
+    el.style.display = '';
 }
 function speak(text) {
     try {
@@ -1123,7 +1127,7 @@ function finishVoiceCalibStep() {
     $('calibHint').textContent = 'Verification complete. Opening examination…';
     // Keep the verified media stream alive while switching from calibration to quiz.
     setTimeout(() => {
-        stopCalibCamera();
+        try { stopCalibCamera(); } catch(e) { console.error('stopCalibCamera error', e); }
         beginQuiz().catch(err => {
             console.error('Unable to open quiz interface:', err);
             quizTransitionStarted = false;
@@ -1166,8 +1170,6 @@ async function beginQuiz() {
     }
 
     // Build the complete course-specific exam before changing the visible screen.
-    // This guarantees that the quiz DOM is populated for both course formats:
-    // Networking = 45 (20 MCQ + 25 fill-in-the-blank), WordPress = 30 MCQ.
     buildQuiz();
     shuffleAllOptions();
     if (!State.quiz.questions.length) throw new Error('No questions loaded for the selected course.');
@@ -1191,7 +1193,6 @@ async function beginQuiz() {
     startDevToolsWatch();
 
     // Camera/mic monitoring starts after the test UI is visible.
-    // Do not await it: a camera/model delay must never prevent the test interface.
     startQuizCamera().catch(err => {
         console.error('Quiz camera initialization failed:', err);
         $('camStatus').textContent = 'Camera monitoring unavailable';
